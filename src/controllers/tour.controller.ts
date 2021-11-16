@@ -1,18 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import fs from "fs";
 import { data } from "../dev-data/data/tours-simple.data";
 
-// const readFileSrc: any = `${__dirname}/dev-data/data/tours-simple.json`;
-// console.log({ __dirname });
-// const tourJson = fs.readFileSync(readFileSrc);
-
 const tours = data;
 
-export const checkID = (req: any, res: Response, next: any, val: any) => {
-  console.log(`Tour id is: ${val}`);
-  if (req.params.id * 1 > tours.length) {
+interface TourParams {
+  id?: number;
+  name: string;
+  price: string;
+}
+
+/**
+ * Request<RequestParams, RequestQuery, RequestBody>
+ */
+export const checkID = (req: Request<TourParams, never, never>, res: Response, next: NextFunction) => {
+  const { params } = req;
+  if (params.id && params.id * 1 > tours.length) {
     return res.status(404).json({
       status: 'fail',
       message: 'Invalid ID'
@@ -22,7 +27,7 @@ export const checkID = (req: any, res: Response, next: any, val: any) => {
 }
 
 
-export const checkBody = (req: any, res: Response, next: any) => {
+export const checkBody = (req: Request<never, never, TourParams>, res: Response, next: NextFunction) => {
   if (!req.body.name || !req.body.price) {
     return res.status(400).json({
       status: 'fail',
@@ -32,9 +37,7 @@ export const checkBody = (req: any, res: Response, next: any) => {
   next();
 };
 
-export const getAllTours = (req: Request, res: Response) => {
-  console.log(req.requestTime);
-
+export const getAllTours = (req: Request<never, never, TourParams>, res: Response) => {
   res.status(200).json({
     status: 'success',
     requestedAt: req.requestTime,
@@ -45,9 +48,8 @@ export const getAllTours = (req: Request, res: Response) => {
   });
 };
 
-export const getTour = (req: any, res: Response) => {
-  console.log(req.params);
-  const id = req.params.id * 1;
+export const getTour = (req: Request<TourParams, never, never>, res: Response) => {
+  const id = req.params.id ? req.params.id * 1 : 0;
 
   const tour = tours.find((el: any) => el.id === id);
 
@@ -68,7 +70,7 @@ export const createTour = (req: Request, res: Response) => {
   fs.writeFile(
     `${__dirname}/dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
-    (err: any) => {
+    () => {
       res.status(201).json({
         status: 'success',
         data: {
