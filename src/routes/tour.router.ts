@@ -1,19 +1,18 @@
-import express from "express";
-import * as TourController from "../controllers/tour.controller";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import express from 'express';
+import * as TourController from '../controllers/tour.controller';
 
 const router = express.Router();
 
-router.param("id", TourController.checkID);
+router
+  .route('/:id')
+  .put(TourController.updateTour)
+  .delete(TourController.deleteTour)
+  .get(TourController.getTour);
 
 router
-  .route("/")
+  .route('/')
   .get(TourController.getAllTours)
-  .post(TourController.checkBody, TourController.createTour);
-
-router
-  .route("/:id")
-  .get(TourController.getTour)
-  .patch(TourController.updateTour)
-  .delete(TourController.deleteTour);
+  .post(TourController.createTour);
 
 export default router;
