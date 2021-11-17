@@ -4,7 +4,7 @@ import { APP_ENDPOINT } from './constants';
 
 import tourRouter from './routes/tour.router';
 import userRouter from './routes/user.router';
-
+import mealRouter from './routes/meal.router';
 
 const app = express();
 
@@ -27,5 +27,6 @@ app.use((req: Request, res: Response, next) => {
 // 3) ROUTES
 app.use(APP_ENDPOINT.TOURS, tourRouter);
 app.use(APP_ENDPOINT.USER, userRouter);
+app.use(APP_ENDPOINT.MEAL, mealRouter);
 
 export default app;
