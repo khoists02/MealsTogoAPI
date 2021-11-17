@@ -4,6 +4,7 @@ export const HTTPS_STATUS = {
   CREATE_ERROR: 'Create Error',
   UPDATE_ERROR: 'Update Error',
   GET_ERROR: 'Get Error',
+  DELETE_ERROR: 'Delete Error',
 };
 
 export const HTTPS_CODE = {
