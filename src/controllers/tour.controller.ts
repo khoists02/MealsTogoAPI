@@ -6,6 +6,31 @@ import { IError } from '../interfaces/http-error.interface';
 import { ITourModel } from '../interfaces/tours.interface';
 import { ToursModel } from '../models/tours.model';
 
+export const getAllTours = async (req: Request, res: Response) => {
+  try {
+    const tours = await ToursModel.find();
+    res.status(HTTPS_CODE.NO_CONTENT)
+      .json({
+        status: HTTPS_STATUS.SUCCESS,
+        data: {
+          tours: tours.map((tour: ITourModel) => {
+            return {
+              name: tour.name,
+              price: tour.price,
+            };
+          }),
+        },
+      });
+  } catch (error: IError | unknown | any) {
+    res.status(HTTPS_CODE.SERVER_ERROR)
+      .json({
+        status: HTTPS_STATUS.GET_ERROR,
+        errors: error?.errors,
+        message: error?.message,
+      });
+  }
+};
+
 export const createTour = async (req: Request, res: Response) => {
   try {
     const newTour: ITourModel = await ToursModel.create(req.body);

@@ -6,6 +6,7 @@ const router = express.Router();
 
 router
   .route('/')
+  .get(TourController.getAllTours)
   .post(TourController.createTour);
 
 export default router;
