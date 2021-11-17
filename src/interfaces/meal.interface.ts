@@ -1,8 +1,9 @@
 export interface IMeal {
   name: string;
-  description: string;
-  address: string;
+  description?: string;
+  address?: string;
   isOpen: boolean;
-  photo: string;
-  icon: string;
+  photos?: string[];
+  icon?: string;
+  rate?: number;
 }

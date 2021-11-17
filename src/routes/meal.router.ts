@@ -4,14 +4,13 @@ import * as MealsController from '../controllers/meals.controller';
 
 const router = express.Router();
 
-// router
-//   .route('/:id')
-//   .put(TourController.updateTour)
-//   .delete(TourController.deleteTour)
-//   .get(TourController.getTour);
+router
+  .route('/:id')
+  .put(MealsController.updateMeal);
 
 router
   .route('/')
+  .get(MealsController.getMeals)
   .post(MealsController.createMeal);
 
 export default router;
