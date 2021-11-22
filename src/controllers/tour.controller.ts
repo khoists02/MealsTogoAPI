@@ -9,45 +9,41 @@ import { ToursModel } from '../models/tours.model';
 export const getTour = async (req: Request, res: Response) => {
   try {
     const tour = await ToursModel.findOne({ _id: req.params.id });
-    res.status(HTTPS_CODE.NO_CONTENT)
-      .json({
-        status: HTTPS_STATUS.SUCCESS,
-        data: {
-          tour,
-        },
-      });
+    res.status(HTTPS_CODE.NO_CONTENT).json({
+      status: HTTPS_STATUS.SUCCESS,
+      data: {
+        tour,
+      },
+    });
   } catch (error: IError | unknown | any) {
-    res.status(HTTPS_CODE.NOT_FOUND)
-      .json({
-        status: HTTPS_STATUS.GET_ERROR,
-        errors: error,
-        message: error?.message,
-      });
+    res.status(HTTPS_CODE.NOT_FOUND).json({
+      status: HTTPS_STATUS.GET_ERROR,
+      errors: error,
+      message: error?.message,
+    });
   }
 };
 
 export const getAllTours = async (req: Request, res: Response) => {
   try {
     const tours = await ToursModel.find();
-    res.status(HTTPS_CODE.NO_CONTENT)
-      .json({
-        status: HTTPS_STATUS.SUCCESS,
-        data: {
-          tours: tours.map((tour: ITourModel) => {
-            return {
-              name: tour.name,
-              price: tour.price,
-            };
-          }),
-        },
-      });
+    res.status(HTTPS_CODE.NO_CONTENT).json({
+      status: HTTPS_STATUS.SUCCESS,
+      data: {
+        tours: tours.map((tour: ITourModel) => {
+          return {
+            name: tour.name,
+            price: tour.price,
+          };
+        }),
+      },
+    });
   } catch (error: IError | unknown | any) {
-    res.status(HTTPS_CODE.SERVER_ERROR)
-      .json({
-        status: HTTPS_STATUS.GET_ERROR,
-        errors: error?.errors,
-        message: error?.message,
-      });
+    res.status(HTTPS_CODE.SERVER_ERROR).json({
+      status: HTTPS_STATUS.GET_ERROR,
+      errors: error?.errors,
+      message: error?.message,
+    });
   }
 };
 

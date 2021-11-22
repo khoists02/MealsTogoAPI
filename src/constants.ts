@@ -1,6 +1,6 @@
 // tslint:disable-next-line: one-variable-per-declaration
 export const HTTPS_STATUS = {
-  SUCCESS : 'success',
+  SUCCESS: 'success',
   CREATE_ERROR: 'Create Error',
   UPDATE_ERROR: 'Update Error',
   GET_ERROR: 'Get Error',

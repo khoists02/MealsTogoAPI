@@ -1,15 +1,15 @@
 /* eslint-disable */
 import { Request } from 'express';
 /**
-* $gte equal >= greater than or equal
-* $gt equal > greater than
-* $lt equal < less than
-* $lte equal <= less than or equal
-* $eq mean equal ===
-* $in match with any value in an array
-* $ne mean not equal
-* $nin not match with any value in an array
-*/
+ * $gte equal >= greater than or equal
+ * $gt equal > greater than
+ * $lt equal < less than
+ * $lte equal <= less than or equal
+ * $eq mean equal ===
+ * $in match with any value in an array
+ * $ne mean not equal
+ * $nin not match with any value in an array
+ */
 // tslint:disable-next-line: prefer-array-literal
 export const buildQueryString = (request: Request, searchFields?: string[]) => {
   const paramsObject = { ...request.query };
@@ -24,7 +24,7 @@ export const buildQueryString = (request: Request, searchFields?: string[]) => {
   }
 
   let queryString: string = JSON.stringify(paramsObject);
-  queryString = queryString.replace(/\b(gte|gt|lte|le|eq|in|nin)\b/g, match => `$${match}`);
+  queryString = queryString.replace(/\b(gte|gt|lte|le|eq|in|nin)\b/g, (match) => `$${match}`);
   return queryString;
 };
 
@@ -37,7 +37,7 @@ export const sortBy = (req: Request, defaultSort = '-createdDate') => {
     sortByQuery = arr.join(' ');
   }
   return sortByQuery;
-}
+};
 
 export const selectFields = (req: Request) => {
   const fieldsString = req.query.fields as string;
@@ -47,4 +47,4 @@ export const selectFields = (req: Request) => {
     result = arr.join(' ');
   }
   return result;
-}
+};
