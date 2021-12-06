@@ -19,4 +19,5 @@ export const APP_ENDPOINT = {
   TOURS: '/api/v1/tours',
   USER: '/api/v1/users',
   MEAL: '/api/v1/meals',
+  AUTH: '/api/v1/auth',
 };

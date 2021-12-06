@@ -6,4 +6,5 @@ export interface IMeal {
   photos?: string[];
   icon?: string;
   rate?: number;
+  test?: number;
 }

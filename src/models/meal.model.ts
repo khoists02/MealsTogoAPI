@@ -19,6 +19,7 @@ const mealsSchema = new Schema<IMeal>({
   address: String,
   isOpen: Boolean,
   rate: { type: Number, max: 5, min: 0, default: 5 },
+  test: { type: Number, max: 5, min: 0, default: 1 },
 });
 
 // Sample Middleware

@@ -7,8 +7,8 @@
     ],
     "jsRules": {
         "quotemark": [
-            false,
-            "single"
+            true,
+            "double"
         ]
     },
     "rules": {},
