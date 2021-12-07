@@ -1,9 +1,15 @@
-import { Request, Response } from 'express';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { NextFunction, Request, Response } from 'express';
+import dotenv from 'dotenv';
 import { HTTPS_CODE, HTTPS_STATUS } from '../constants';
 import { IUser } from '../interfaces/users.interface';
 import { UsersModel } from '../models/users.model';
+// tslint:disable-next-line: import-name
+import AppError from '../utils/appError';
 import { catchAsync } from '../utils/catchAsync';
-
+// tslint:disable-next-line: import-name
+import jwt from 'jsonwebtoken';
+dotenv.config({ path: './config.env' });
 export const signup = catchAsync(async (req: Request, res: Response) => {
   const newUser: IUser = await UsersModel.create(req.body);
   res.status(HTTPS_CODE.CREATE_SUCCESS).json({
@@ -13,3 +19,70 @@ export const signup = catchAsync(async (req: Request, res: Response) => {
     },
   });
 });
+
+const generalJWToken = (id: string) => {
+  return jwt.sign({ id }, process.env.JWT_SECRETS || '', { expiresIn: process.env.JWT_EXPIRES_IN || '90d' });
+};
+
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      next(new AppError('Please provide the email and password', 400));
+    }
+
+    const user: any = await UsersModel.findOne({ email }).select('+password');
+    const correct = await user.correctPassword(password, user?.password);
+
+    if (!user || !correct) {
+      res.status(400).json({
+        status: 401,
+        message: 'Wrong email or password',
+      });
+    }
+    const token = generalJWToken(user._id);
+    res.status(200).json({
+      token,
+      statusCode: 200,
+      data: {
+        user: {
+          username: user.name,
+          id: user._id,
+          email: user.email,
+        },
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: 'Something was wrong',
+      // tslint:disable-next-line: object-shorthand-properties-first
+      error,
+    });
+  }
+};
+
+export const authProtected = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { authorization } = req.headers;
+    let token = '';
+    if (authorization && authorization.startsWith('Bearer')) {
+      token = authorization.split(' ')[1];
+    }
+    if (!token) {
+      next(new AppError('You are not logged in, Please login to get access..', 401));
+    }
+
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRETS || '');
+
+    const currentUser = await UsersModel.findById(decoded.id);
+
+    if (!currentUser) {
+      next(new AppError('Invalid the token', 401));
+    }
+    next();
+  } catch (error: any) {
+    next(new AppError('Something was wrong', 500));
+  }
+};

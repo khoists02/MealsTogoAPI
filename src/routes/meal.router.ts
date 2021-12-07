@@ -1,19 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import express from 'express';
 import * as MealsController from '../controllers/meals.controller';
+import * as AuthController from '../controllers/auth.controller';
 
 const router = express.Router();
 
 router.route('/top-five-meals')
-  .get(MealsController.topFiveRateForMeals, MealsController.getMeals);
+  .get(AuthController.authProtected, MealsController.topFiveRateForMeals, MealsController.getMeals);
 
 router.route('/:id')
-  .put(MealsController.updateMeal)
-  .get(MealsController.getMeal)
-  .delete(MealsController.deleteMeal);
+  .put(AuthController.authProtected, MealsController.updateMeal)
+  .get(AuthController.authProtected, MealsController.getMeal)
+  .delete(AuthController.authProtected, MealsController.deleteMeal);
 
 router.route('/')
-  .get(MealsController.getMeals)
-  .post(MealsController.createMeal);
+  .get(AuthController.authProtected, MealsController.getMeals)
+  .post(AuthController.authProtected, MealsController.createMeal);
 
 export default router;

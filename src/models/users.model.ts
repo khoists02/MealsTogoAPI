@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { Schema, model } from 'mongoose';
-import { IUser } from '../interfaces/users.interface';
+import { IUserModel, IUserEntity } from '../interfaces/users.interface';
 import validator from 'validator';
 // tslint:disable-next-line: import-name
 import bcrypt from 'bcryptjs';
 
-const usersSchema = new Schema<IUser>({
+const usersSchema = new Schema<IUserEntity>({
   name: {
     type: String,
     unique: true,
@@ -23,6 +24,7 @@ const usersSchema = new Schema<IUser>({
     type: String,
     required: true,
     minlength: 8,
+    select: false,
   },
   confirmPassword: {
     type: String,
@@ -38,9 +40,17 @@ const usersSchema = new Schema<IUser>({
 usersSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
-  this.confirmPassword = undefined;
+  this.confirmPassword = '';
   next();
 });
 
+usersSchema.methods.correctPassword = async (candidatePassword: string, password: string) => {
+  return await bcrypt.compare(candidatePassword, password);
+};
+
+usersSchema.statics.findByUsername = function (username: string) {
+  return this.findOne({ username });
+};
+
 // tslint:disable-next-line: variable-name
-export const UsersModel = model<IUser>('users', usersSchema);
+export const UsersModel = model<IUserEntity, IUserModel>('users', usersSchema);
