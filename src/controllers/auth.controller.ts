@@ -2,16 +2,24 @@
 import { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import { HTTPS_CODE, HTTPS_STATUS } from '../constants';
-import { IUser } from '../interfaces/users.interface';
 import { UsersModel } from '../models/users.model';
 // tslint:disable-next-line: import-name
 import AppError from '../utils/appError';
 import { catchAsync } from '../utils/catchAsync';
 // tslint:disable-next-line: import-name
 import jwt from 'jsonwebtoken';
+import { UsersRolesModel } from '../models/users_roles_model';
+import { RolesModel } from '../models/roles.model';
+import { Types } from 'mongoose';
+import { Role } from '../interfaces/roles.interface';
 dotenv.config({ path: './config.env' });
+
 export const signup = catchAsync(async (req: Request, res: Response) => {
-  const newUser: IUser = await UsersModel.create(req.body);
+  const newUser: any = await UsersModel.create(req.body);
+
+  const userRole = await RolesModel.findOne({ name: 'user' });
+  const usersRoles = new UsersRolesModel({ userId: newUser._id, roleId: userRole?._id });
+  usersRoles.save();
   res.status(HTTPS_CODE.CREATE_SUCCESS).json({
     status: HTTPS_STATUS.SUCCESS,
     data: {
@@ -42,6 +50,18 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       });
     }
     const token = generalJWToken(user._id);
+
+    const usersRoles = await UsersRolesModel.find({ userId: user._id });
+    let roleNames: string[] = [];
+    if (usersRoles && usersRoles.length > 0) {
+      // tslint:disable-next-line: ter-arrow-parens
+      const roleIds = usersRoles.map((x) => new Types.ObjectId(x.roleId));
+      const roles = await RolesModel.find({
+        _id: { $in: roleIds },
+      });
+      roleNames = roles.map((role: Role) => role.name) as string[];
+    }
+
     res.status(200).json({
       token,
       statusCode: 200,
@@ -50,6 +70,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
           username: user.name,
           id: user._id,
           email: user.email,
+          roles: roleNames,
         },
       },
     });
@@ -63,7 +84,16 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
-export const authProtected = async (req: Request, res: Response, next: NextFunction) => {
+export const checkPermission = (permissions: string[]) => {
+  return (req: any, res: Response, next: NextFunction) => {
+    if (!permissions.some((item: string) => req.user.roles.includes(item))) {
+      return next(new AppError('You do not have a permission access this API', 403));
+    }
+    next();
+  };
+};
+
+export const authProtected = async (req: any, res: Response, next: NextFunction) => {
   try {
     const { authorization } = req.headers;
     let token = '';
@@ -73,14 +103,26 @@ export const authProtected = async (req: Request, res: Response, next: NextFunct
     if (!token) {
       next(new AppError('You are not logged in, Please login to get access..', 401));
     }
-
     const decoded: any = jwt.verify(token, process.env.JWT_SECRETS || '');
 
     const currentUser = await UsersModel.findById(decoded.id);
-
     if (!currentUser) {
       next(new AppError('Invalid the token', 401));
     }
+    const usersRoles = await UsersRolesModel.find({ userId: currentUser?._id });
+    let roleNames: string[] = [];
+    if (usersRoles && usersRoles.length > 0) {
+      // tslint:disable-next-line: ter-arrow-parens
+      const roleIds = usersRoles.map((x) => new Types.ObjectId(x.roleId));
+      const roles = await RolesModel.find({
+        _id: { $in: roleIds },
+      });
+      roleNames = roles.map((role: Role) => role.name) as string[];
+    }
+    req.user = {
+      ...currentUser,
+      roles: roleNames,
+    };
     next();
   } catch (error: any) {
     next(new AppError('Something was wrong', 500));
