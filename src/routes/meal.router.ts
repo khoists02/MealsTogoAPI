@@ -6,15 +6,40 @@ import * as AuthController from '../controllers/auth.controller';
 const router = express.Router();
 
 router.route('/top-five-meals')
-  .get(AuthController.authProtected, MealsController.topFiveRateForMeals, MealsController.getMeals);
+  .get(
+    AuthController.authProtected,
+    AuthController.checkPermission(['user', 'admin']),
+    MealsController.topFiveRateForMeals,
+    MealsController.getMeals,
+  );
 
 router.route('/:id')
-  .put(AuthController.authProtected, MealsController.updateMeal)
-  .get(AuthController.authProtected, MealsController.getMeal)
-  .delete(AuthController.authProtected, MealsController.deleteMeal);
+  .put(
+    AuthController.authProtected,
+    AuthController.checkPermission(['user', 'admin']),
+    MealsController.updateMeal,
+  )
+  .get(
+    AuthController.authProtected,
+    AuthController.checkPermission(['user', 'admin']),
+    MealsController.getMeal,
+  )
+  .delete(
+    AuthController.authProtected,
+    AuthController.checkPermission(['user', 'admin']),
+    MealsController.deleteMeal,
+  );
 
 router.route('/')
-  .get(AuthController.authProtected, MealsController.getMeals)
-  .post(AuthController.authProtected, MealsController.createMeal);
+  .get(
+    AuthController.authProtected,
+    AuthController.checkPermission(['user', 'admin']),
+    MealsController.getMeals,
+  )
+  .post(
+    AuthController.authProtected,
+    AuthController.checkPermission(['user', 'admin']),
+    MealsController.createMeal,
+  );
 
 export default router;

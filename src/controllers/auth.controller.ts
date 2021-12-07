@@ -14,6 +14,57 @@ import { Types } from 'mongoose';
 import { Role } from '../interfaces/roles.interface';
 dotenv.config({ path: './config.env' });
 
+/**
+ * Controllers
+ */
+
+// export const authenticatedUser =
+//   catchAsync(async (req: any, res: Response) => {
+//     const { authorization } = req.headers;
+//     let token = '';
+//     if (authorization && authorization.startsWith('Bearer')) {
+//       token = authorization.split(' ')[1];
+//     }
+//     if (!token) {
+//       res.status(401).json({
+//         message: 'You are not logged in, Please login to get access..',
+//       });
+//     }
+//     const decoded: any = jwt.verify(token, process.env.JWT_SECRETS || '');
+
+//     const currentUser = await UsersModel.findById(decoded.id);
+//     if (!currentUser) {
+//       res.status(401).json({
+//         message: 'Invalid token .',
+//       });
+//       return;
+//     }
+
+//     const usersRoles = await UsersRolesModel.find({ userId: currentUser?._id });
+//     let roleNames: string[] = [];
+//     if (usersRoles && usersRoles.length > 0) {
+//     // tslint:disable-next-line: ter-arrow-parens
+//       const roleIds = usersRoles.map((x) => new Types.ObjectId(x.roleId));
+//       const roles = await RolesModel.find({
+//         _id: { $in: roleIds },
+//       });
+//       roleNames = roles.map((role: Role) => role.name) as string[];
+//     }
+
+//     const userResponse = {
+//       id: currentUser._id,
+//       name: currentUser.name,
+//       email: currentUser.email,
+//       roles: roleNames,
+//     };
+//     res.status(200).json({
+//       type: 'success',
+//       data: {
+//         user: userResponse,
+//       },
+//     });
+//   });
+
 export const signup = catchAsync(async (req: Request, res: Response) => {
   const newUser: any = await UsersModel.create(req.body);
 
@@ -78,15 +129,34 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     res.status(500).json({
       status: 500,
       message: 'Something was wrong',
-      // tslint:disable-next-line: object-shorthand-properties-first
-      error,
     });
   }
 };
 
+export const logout = (req: any, res: Response) => {
+  req.user = null;
+  req.headers.authorization = null;
+  res.status(200).json({
+    message: 'success',
+  });
+};
+
+/**
+ * Middleware
+ * @param permissions
+ * @returns
+ */
+
 export const checkPermission = (permissions: string[]) => {
   return (req: any, res: Response, next: NextFunction) => {
-    if (!permissions.some((item: string) => req.user.roles.includes(item))) {
+    const roles = req.user?.roles || [];
+    if (
+      roles.length === 0 ||
+      (
+        permissions.length > 0 &&
+        !permissions.some((item: string) => roles.includes(item))
+      )
+    ) {
       return next(new AppError('You do not have a permission access this API', 403));
     }
     next();
@@ -108,21 +178,27 @@ export const authProtected = async (req: any, res: Response, next: NextFunction)
     const currentUser = await UsersModel.findById(decoded.id);
     if (!currentUser) {
       next(new AppError('Invalid the token', 401));
+      return;
     }
+
     const usersRoles = await UsersRolesModel.find({ userId: currentUser?._id });
     let roleNames: string[] = [];
     if (usersRoles && usersRoles.length > 0) {
-      // tslint:disable-next-line: ter-arrow-parens
+    // tslint:disable-next-line: ter-arrow-parens
       const roleIds = usersRoles.map((x) => new Types.ObjectId(x.roleId));
       const roles = await RolesModel.find({
         _id: { $in: roleIds },
       });
       roleNames = roles.map((role: Role) => role.name) as string[];
     }
-    req.user = {
-      ...currentUser,
+
+    const userResponse = {
+      id: currentUser._id,
+      name: currentUser.name,
+      email: currentUser.email,
       roles: roleNames,
     };
+    req.user = userResponse;
     next();
   } catch (error: any) {
     next(new AppError('Something was wrong', 500));
