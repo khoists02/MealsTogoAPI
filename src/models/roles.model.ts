@@ -1,5 +1,5 @@
-import { Schema, model } from 'mongoose';
-import { RoleEntity, RoleModel } from '../interfaces/roles.interface';
+import { Schema, model } from "mongoose";
+import { RoleEntity, RoleModel } from "../interfaces/roles.interface";
 
 const rolesSchema = new Schema<RoleEntity>({
   name: {
@@ -15,4 +15,4 @@ rolesSchema.statics.findByRoleName = function (name: string) {
 };
 
 // tslint:disable-next-line: variable-name
-export const RolesModel = model<RoleEntity, RoleModel>('roles', rolesSchema);
+export const RolesModel = model<RoleEntity, RoleModel>("roles", rolesSchema);

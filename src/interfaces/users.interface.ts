@@ -1,4 +1,5 @@
-import { Document, Model } from 'mongoose';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Document, Model } from "mongoose";
 
 export interface IUser {
   name: string;
@@ -6,6 +7,7 @@ export interface IUser {
   photo: string;
   password: string;
   confirmPassword: string;
+  roles?: any;
 }
 
 export interface IUserEntity extends IUser, Document {

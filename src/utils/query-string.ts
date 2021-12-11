@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Request } from 'express';
+import { Request } from "express";
 /**
  * $gte equal >= greater than or equal
  * $gt equal > greater than
@@ -24,27 +24,27 @@ export const buildQueryString = (request: Request, searchFields?: string[]) => {
   }
 
   let queryString: string = JSON.stringify(paramsObject);
-  queryString = queryString.replace(/\b(gte|gt|lte|le|eq|in|nin)\b/g, (match) => `$${match}`);
+  queryString = queryString.replace(/\b(gte|gt|lte|le|eq|in|nin)\b/g, (match: string) => `$${match}`);
   return queryString;
 };
 
-export const sortBy = (req: Request, defaultSort = '-createdDate') => {
+export const sortBy = (req: Request, defaultSort = "-createdDate") => {
   const sortString = req.query.sort as string;
   // tslint:disable-next-line: no-shadowed-variable
   let sortByQuery = defaultSort;
   if (sortString) {
-    const arr = sortString.split(',');
-    sortByQuery = arr.join(' ');
+    const arr = sortString.split(",");
+    sortByQuery = arr.join(" ");
   }
   return sortByQuery;
 };
 
 export const selectFields = (req: Request) => {
   const fieldsString = req.query.fields as string;
-  let result = '-__v';
+  let result = "-__v";
   if (fieldsString) {
-    const arr = fieldsString.split(',');
-    result = arr.join(' ');
+    const arr = fieldsString.split(",");
+    result = arr.join(" ");
   }
   return result;
 };

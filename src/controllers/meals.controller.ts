@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextFunction, Request, Response } from 'express';
-import { HTTPS_CODE, HTTPS_STATUS } from '../constants';
-import { IMeal } from '../interfaces/meal.interface';
-import { MealsModel } from '../models/meal.model';
-import appError from '../utils/appError';
-import { catchAsync } from '../utils/catchAsync';
-import { buildQueryString, selectFields, sortBy } from '../utils/query-string';
+import { NextFunction, Request, Response } from "express";
+import { HTTPS_CODE, HTTPS_STATUS } from "../constants";
+import { IMeal } from "../interfaces/meal.interface";
+import { MealsModel } from "../models/meal.model";
+import appError from "../utils/appError";
+import { catchAsync } from "../utils/catchAsync";
+import { buildQueryString, selectFields, sortBy } from "../utils/query-string";
 
 /**
  * GET TOP FIVE API /
  * GET: 127.0.0.1:3000/api/v1/meals/top-five-meals
  */
 export const topFiveRateForMeals = (req: Request, res: Response, next: NextFunction) => {
-  req.query.limit = '5';
-  req.query.sort = '-rate';
+  req.query.limit = "5";
+  req.query.sort = "-rate";
   next();
 };
 
@@ -23,11 +23,11 @@ export const topFiveRateForMeals = (req: Request, res: Response, next: NextFunct
  * GET: 127.0.0.1:3000/api/v1/meals
  */
 export const getMeals = catchAsync(async (req: Request, res: Response) => {
-  const sort = sortBy(req, 'name');
+  const sort = sortBy(req, "name");
   const page: number = Number(req.query.page) * 1 || 1;
   const limit: number = Number(req.query.limit) * 1 || 100;
   const skip: number = (page - 1) * limit;
-  const meals = await MealsModel.find(JSON.parse(buildQueryString(req, ['name', 'description'])))
+  const meals = await MealsModel.find(JSON.parse(buildQueryString(req, ["name", "description"])))
     .sort(sort)
     .select(selectFields(req))
     .skip(skip)

@@ -1,27 +1,28 @@
-import { check } from 'express-validator';
+import { check } from "express-validator";
 
 export const validateConfirmPassword = () => {
-  return check('confirmPassword')
+  return (
+    check("confirmPassword")
+      // To delete leading and triling space
+      .trim()
 
-  // To delete leading and triling space
-  .trim()
+      // Validate minimum length of password
+      // Optional for this context
+      .isLength({ min: 4, max: 16 })
 
-  // Validate minimum length of password
-  // Optional for this context
-  .isLength({ min:4, max:16 })
+      // Custom message
+      .withMessage("Password must be between 4 to 16 characters")
 
-  // Custom message
-  .withMessage('Password must be between 4 to 16 characters')
+      // Custom validation
+      // Validate confirmPassword
+      .custom(async (confirmPassword, { req }) => {
+        const password = req.body.password;
 
-  // Custom validation
-  // Validate confirmPassword
-  .custom(async (confirmPassword, { req }) => {
-    const password = req.body.password;
-
-    // If password and confirm password not same
-    // don't allow to sign up and throw error
-    if (password !== confirmPassword) {
-      throw new Error('Passwords must be same');
-    }
-  });
+        // If password and confirm password not same
+        // don't allow to sign up and throw error
+        if (password !== confirmPassword) {
+          throw new Error("Passwords must be same");
+        }
+      })
+  );
 };

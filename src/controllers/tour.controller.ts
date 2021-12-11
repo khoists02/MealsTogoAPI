@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Request, Response } from 'express';
-import { HTTPS_CODE, HTTPS_STATUS } from '../constants';
-import { IError } from '../interfaces/http-error.interface';
-import { ITourModel } from '../interfaces/tours.interface';
-import { ToursModel } from '../models/tours.model';
+import { Request, Response } from "express";
+import { HTTPS_CODE, HTTPS_STATUS } from "../constants";
+import { IError } from "../interfaces/http-error.interface";
+import { ITourModel } from "../interfaces/tours.interface";
+import { ToursModel } from "../models/tours.model";
 
 export const getTour = async (req: Request, res: Response) => {
   try {

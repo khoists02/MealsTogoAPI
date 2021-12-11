@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { Schema, model } from 'mongoose';
-import { IUserModel, IUserEntity } from '../interfaces/users.interface';
-import validator from 'validator';
+import { Schema, model } from "mongoose";
+import { IUserModel, IUserEntity } from "../interfaces/users.interface";
+import validator from "validator";
 // tslint:disable-next-line: import-name
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 
 const usersSchema = new Schema<IUserEntity>({
   name: {
@@ -15,7 +15,7 @@ const usersSchema = new Schema<IUserEntity>({
   email: {
     type: String,
     required: true,
-    validate: [validator.isEmail, 'Email is invalid'],
+    validate: [validator.isEmail, "Email is invalid"],
   },
   photo: {
     type: String,
@@ -32,15 +32,21 @@ const usersSchema = new Schema<IUserEntity>({
       validator(el: string) {
         return el === this.password;
       },
-      message: 'The Confirm password are not the same',
+      message: "The Confirm password are not the same",
     },
   },
+  roles: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Role",
+    },
+  ],
 });
 
-usersSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+usersSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
-  this.confirmPassword = '';
+  this.confirmPassword = "";
   next();
 });
 
@@ -53,4 +59,4 @@ usersSchema.statics.findByUsername = function (username: string) {
 };
 
 // tslint:disable-next-line: variable-name
-export const UsersModel = model<IUserEntity, IUserModel>('users', usersSchema);
+export const UsersModel = model<IUserEntity, IUserModel>("users", usersSchema);

@@ -11,6 +11,13 @@
             "double"
         ]
     },
-    "rules": {},
+    "rules": {
+        "quotes": ["error", "single"], 
+        "quotemark": [
+            true,
+            "double"
+        ],
+        "max-line-length": [true, 120]
+    },
     "rulesDirectory": []
 }
