@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Schema, model } from "mongoose";
 import { IUserModel, IUserEntity } from "../interfaces/users.interface";
+import { RolesModel } from "./roles.model";
 import validator from "validator";
 // tslint:disable-next-line: import-name
 import bcrypt from "bcryptjs";
@@ -38,7 +39,7 @@ const usersSchema = new Schema<IUserEntity>({
   roles: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Role",
+      ref: "roles",
     },
   ],
 });

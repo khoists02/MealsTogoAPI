@@ -10,60 +10,7 @@ import { catchAsync } from "../utils/catchAsync";
 import jwt from "jsonwebtoken";
 import { UsersRolesModel } from "../models/users_roles_model";
 import { RolesModel } from "../models/roles.model";
-import { Types } from "mongoose";
-import { Role } from "../interfaces/roles.interface";
 dotenv.config({ path: "./config.env" });
-
-/**
- * Controllers
- */
-
-// export const authenticatedUser =
-//   catchAsync(async (req: any, res: Response) => {
-//     const { authorization } = req.headers;
-//     let token = '';
-//     if (authorization && authorization.startsWith('Bearer')) {
-//       token = authorization.split(' ')[1];
-//     }
-//     if (!token) {
-//       res.status(401).json({
-//         message: 'You are not logged in, Please login to get access..',
-//       });
-//     }
-//     const decoded: any = jwt.verify(token, process.env.JWT_SECRETS || '');
-
-//     const currentUser = await UsersModel.findById(decoded.id);
-//     if (!currentUser) {
-//       res.status(401).json({
-//         message: 'Invalid token .',
-//       });
-//       return;
-//     }
-
-//     const usersRoles = await UsersRolesModel.find({ userId: currentUser?._id });
-//     let roleNames: string[] = [];
-//     if (usersRoles && usersRoles.length > 0) {
-//     // tslint:disable-next-line: ter-arrow-parens
-//       const roleIds = usersRoles.map((x) => new Types.ObjectId(x.roleId));
-//       const roles = await RolesModel.find({
-//         _id: { $in: roleIds },
-//       });
-//       roleNames = roles.map((role: Role) => role.name) as string[];
-//     }
-
-//     const userResponse = {
-//       id: currentUser._id,
-//       name: currentUser.name,
-//       email: currentUser.email,
-//       roles: roleNames,
-//     };
-//     res.status(200).json({
-//       type: 'success',
-//       data: {
-//         user: userResponse,
-//       },
-//     });
-//   });
 
 export const signup = catchAsync(async (req: Request, res: Response) => {
   const newUser: any = await UsersModel.create(req.body);
@@ -91,7 +38,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       next(new AppError("Please provide the email and password", 400));
     }
 
-    const user: any = await UsersModel.findOne({ email }).select("+password");
+    const user: any = await UsersModel.findOne({ email }).populate("roles", "name").select("+password");
     const correct = await user.correctPassword(password, user?.password);
 
     if (!user || !correct) {
@@ -102,17 +49,6 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     }
     const token = generalJWToken(user._id);
 
-    const usersRoles = await UsersRolesModel.find({ userId: user._id });
-    let roleNames: string[] = [];
-    if (usersRoles && usersRoles.length > 0) {
-      // tslint:disable-next-line: ter-arrow-parens
-      const roleIds = usersRoles.map((x) => new Types.ObjectId(x.roleId));
-      const roles = await RolesModel.find({
-        _id: { $in: roleIds },
-      });
-      roleNames = roles.map((role: Role) => role.name) as string[];
-    }
-
     res.status(200).json({
       token,
       statusCode: 200,
@@ -121,7 +57,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
           username: user.name,
           id: user._id,
           email: user.email,
-          roles: roleNames,
+          roles: user.roles.map((x: any) => x.name),
         },
       },
     });
@@ -169,28 +105,16 @@ export const authenticatedRouter = async (req: any, res: Response, next: NextFun
     }
     const decoded: any = jwt.verify(token, process.env.JWT_SECRETS || "");
 
-    const currentUser = await UsersModel.findById(decoded.id);
+    const currentUser = await UsersModel.findById(decoded.id).populate("roles", "name");
     if (!currentUser) {
       next(new AppError("Invalid the token", 401));
       return;
     }
-
-    const usersRoles = await UsersRolesModel.find({ userId: currentUser?._id });
-    let roleNames: string[] = [];
-    if (usersRoles && usersRoles.length > 0) {
-      // tslint:disable-next-line: ter-arrow-parens
-      const roleIds = usersRoles.map((x) => new Types.ObjectId(x.roleId));
-      const roles = await RolesModel.find({
-        _id: { $in: roleIds },
-      });
-      roleNames = roles.map((role: Role) => role.name) as string[];
-    }
-
     const userResponse = {
       id: currentUser._id,
       name: currentUser.name,
       email: currentUser.email,
-      roles: roleNames,
+      roles: currentUser.roles.map((x: any) => x.name),
     };
     req.user = userResponse;
     next();

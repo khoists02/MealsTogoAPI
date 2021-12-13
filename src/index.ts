@@ -6,6 +6,7 @@ import tourRouter from "./routes/tour.router";
 // import userRouter from './routes/user.router';
 import mealRouter from "./routes/meal.router";
 import authRouter from "./routes/auth.router";
+import userRouter from "./routes/user.router";
 import appError from "./utils/appError";
 import { ErrorController } from "./controllers/error.controller";
 
@@ -24,7 +25,7 @@ app.use(APP_ENDPOINT.TOURS, tourRouter);
 // app.use(APP_ENDPOINT.USER, userRouter);
 app.use(APP_ENDPOINT.MEAL, mealRouter);
 app.use(APP_ENDPOINT.AUTH, authRouter);
-
+app.use(APP_ENDPOINT.USER, userRouter);
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   const err = new appError(`Can not find ${req.originalUrl} on this application !!!`, 400);
   err.status = "fail";
